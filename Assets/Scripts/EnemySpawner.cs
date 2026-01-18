@@ -43,6 +43,19 @@ public class EnemySpawner : MonoBehaviour
         spawnTimer += Time.deltaTime;
 
         // ... Gestion Boss ...
+        // Boss 1 apparaît à 60 secondes (1 minute)
+        if (gameTimer >= 60f && !boss1Spawned)
+        {
+            if (boss1Prefab != null) SpawnBoss(boss1Prefab);
+            boss1Spawned = true; // La variable est maintenant "utilisée" !
+        }
+
+        // Boss 2 apparaît à 120 secondes (2 minutes)
+        if (gameTimer >= 120f && !boss2Spawned)
+        {
+            if (boss2Prefab != null) SpawnBoss(boss2Prefab);
+            boss2Spawned = true; // La variable est utilisée
+        }
 
         // Intervalle de spawn (On revient à la réduction douce normale : 0.1f)
         float currentInterval = Mathf.Max(minSpawnInterval, baseSpawnInterval - (gameTimer / 60f) * 0.1f);

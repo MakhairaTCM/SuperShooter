@@ -8,7 +8,7 @@ public class NetworkUploader : MonoBehaviour
     [Header("Configuration Serveur")]
     // Remplace 'vsapo' par ton nom de compte exact s'il est différent
     // L'URL doit pointer vers ton fichier index.php
-    public string uploadUrl = "http://vsapo.alwaysdata.net/api/index.php";
+    public string uploadUrl = "https://vsapo.alwaysdata.net/api/index.php";
 
     public void SendDataToDatabase(GameSessionData data)
     {
