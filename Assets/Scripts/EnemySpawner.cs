@@ -6,27 +6,36 @@ public class EnemySpawner : MonoBehaviour
     [System.Serializable]
     public class Wave
     {
-        public string name;
-        public GameObject enemyPrefab;
-        public float spawnStartTime;
-        public float weight = 1f;
+        public string name;             // Nom pour t'y retrouver (ex: "Robot Basic")
+        public GameObject enemyPrefab;  // Le prefab
+        public float spawnStartTime;    // Apparait à partir de quand ? (secondes)
+        public float weight = 1f;       // Chance d'apparition
     }
 
-    [Header("Configuration")]
-    public List<Wave> enemies;
+    [Header("Configuration des Vagues")]
+    public List<Wave> enemies;          // Ta liste d'ennemis
     public GameObject boss1Prefab;
     public GameObject boss2Prefab;
 
-    [Header("Paramètres de Spawn")]
+    [Header("Paramètres de Spawn & Difficulté")]
     public float spawnRadius = 12f;
-    public float baseSpawnInterval = 1f; // Temps de base entre les vagues
-    public float minSpawnInterval = 0.2f; // Cap pour ne pas faire crasher le jeu
+    public float baseSpawnInterval = 1f;
+    public float minSpawnInterval = 0.1f;
+
+    // NOUVEAU : Contrôle la vitesse à laquelle le jeu devient dur
+    // 0.05 = Normal, 0.1 = Difficile, 0.2 = Cauchemar
+    public float difficultyScaling = 0.05f;
+
+    [Header("OUTILS DE DEBUG (Tests)")]
+    public bool forceSingleType = false;    // Coche pour forcer un seul type
+    public int enemyIndexToSpawn = 0;       // L'index dans la liste 'enemies' ci-dessus
+    public bool spawnBossNow = false;       // Coche pour faire apparaître Boss 1 direct
 
     private float gameTimer;
     private float spawnTimer;
     private Transform player;
 
-    // Gestion Boss
+    // Gestion Boss Auto
     private bool boss1Spawned = false;
     private bool boss2Spawned = false;
 
@@ -42,16 +51,41 @@ public class EnemySpawner : MonoBehaviour
         gameTimer += Time.deltaTime;
         spawnTimer += Time.deltaTime;
 
-        // ... Gestion Boss ...
+        // --- 1. GESTION DEBUG BOSS ---
+        if (spawnBossNow)
+        {
+            SpawnBoss(boss1Prefab);
+            spawnBossNow = false; // On décoche automatiquement
+        }
 
-        // Intervalle de spawn (On revient à la réduction douce normale : 0.1f)
-        float currentInterval = Mathf.Max(minSpawnInterval, baseSpawnInterval - (gameTimer / 60f) * 0.1f);
+        // --- 2. GESTION BOSS AUTO (Temps) ---
+        // Exemple : Boss 1 à 300s (5min), Boss 2 à 600s (10min)
+        if (!boss1Spawned && gameTimer >= 300f)
+        {
+            SpawnBoss(boss1Prefab);
+            boss1Spawned = true;
+        }
+        if (!boss2Spawned && gameTimer >= 600f)
+        {
+            SpawnBoss(boss2Prefab);
+            boss2Spawned = true;
+        }
+
+        // --- 3. CALCUL DE L'INTERVALLE (Courbe Logarithmique) ---
+        // Formule : Plus le temps avance, plus le diviseur est grand, donc l'intervalle petit.
+        float currentInterval = baseSpawnInterval / (1f + (gameTimer * difficultyScaling));
+
+        // On s'assure de ne pas descendre sous le minimum (sinon crash CPU)
+        if (currentInterval < minSpawnInterval) currentInterval = minSpawnInterval;
 
         if (spawnTimer >= currentInterval)
         {
-            // C'EST ICI QU'ON APPLIQUE LE X2
-            // On calcule le nombre normal, et on le double.
-            int enemiesPerBatch = (1 + (int)(gameTimer / 60f)) * 2;
+            // --- 4. CALCUL DU NOMBRE D'ENNEMIS (Batch) ---
+            // On garde ta logique "x2" car elle est satisfaisante
+            int enemiesPerBatch = (1 + (int)(gameTimer / 60f));
+
+            // Optionnel : Si le jeu est très avancé (> 10min), on double encore
+            if (gameTimer > 600) enemiesPerBatch *= 2;
 
             for (int i = 0; i < enemiesPerBatch; i++)
             {
@@ -64,54 +98,88 @@ public class EnemySpawner : MonoBehaviour
 
     void SpawnBoss(GameObject bossPrefab)
     {
+        if (bossPrefab == null) return;
+
         Vector2 spawnPos = GetRandomSpawnPos();
-        Debug.Log(" WARNING : BOSS APPROACHING ");
-        Instantiate(bossPrefab, spawnPos, Quaternion.identity);
+        Debug.Log($" BOSS SPAWN : {bossPrefab.name} !");
+
+        // Instanciation
+        GameObject boss = Instantiate(bossPrefab, spawnPos, Quaternion.identity);
+
+        // On buff le boss selon le temps aussi !
+        float bossBuff = 1f + (gameTimer / 60f) * 0.5f; // +50% stats par minute
+        EnemyAI ai = boss.GetComponent<EnemyAI>();
+        if (ai != null) ai.ApplyGlobalBuff(bossBuff);
     }
 
     void SpawnRandomEnemy()
     {
-        // ... (Logique inchangée pour le choix de l'ennemi) ...
-        List<Wave> availableEnemies = new List<Wave>();
-        float totalWeight = 0f;
+        GameObject selectedPrefab = null;
 
-        foreach (var wave in enemies)
+        // --- A. LOGIQUE DEBUG (Force un type) ---
+        if (forceSingleType)
         {
-            if (gameTimer >= wave.spawnStartTime)
+            if (enemies.Count > enemyIndexToSpawn)
             {
-                availableEnemies.Add(wave);
-                totalWeight += wave.weight;
+                selectedPrefab = enemies[enemyIndexToSpawn].enemyPrefab;
+            }
+            else
+            {
+                Debug.LogWarning("Index Debug invalide !");
+                return;
+            }
+        }
+        // --- B. LOGIQUE NORMALE (Poids & Temps) ---
+        else
+        {
+            List<Wave> availableEnemies = new List<Wave>();
+            float totalWeight = 0f;
+
+            foreach (var wave in enemies)
+            {
+                // On ne prend que ceux qui ont le droit d'apparaître maintenant
+                if (gameTimer >= wave.spawnStartTime)
+                {
+                    availableEnemies.Add(wave);
+                    totalWeight += wave.weight;
+                }
+            }
+
+            if (availableEnemies.Count == 0) return; // Personne dispo ? On quitte.
+
+            float randomValue = Random.Range(0, totalWeight);
+            float cumulativeWeight = 0f;
+
+            foreach (var wave in availableEnemies)
+            {
+                cumulativeWeight += wave.weight;
+                if (randomValue <= cumulativeWeight)
+                {
+                    selectedPrefab = wave.enemyPrefab;
+                    break;
+                }
             }
         }
 
-        if (availableEnemies.Count == 0) return;
-
-        float randomValue = Random.Range(0, totalWeight);
-        float cumulativeWeight = 0f;
-        GameObject selectedPrefab = availableEnemies[0].enemyPrefab;
-
-        foreach (var wave in availableEnemies)
+        if (selectedPrefab != null)
         {
-            cumulativeWeight += wave.weight;
-            if (randomValue <= cumulativeWeight)
+            Vector2 spawnPos = GetRandomSpawnPos();
+            GameObject newEnemy = Instantiate(selectedPrefab, spawnPos, Quaternion.identity);
+
+            // --- C. BUFF DES STATS (Scaling) ---
+            // Formule : +10% de stats toutes les minutes
+            float scalingFactor = 1f + (gameTimer / 60f) * 0.1f;
+
+            EnemyAI ai = newEnemy.GetComponent<EnemyAI>();
+            if (ai != null)
             {
-                selectedPrefab = wave.enemyPrefab;
-                break;
+                ai.ApplyGlobalBuff(scalingFactor);
             }
         }
-
-        Vector2 spawnPos = GetRandomSpawnPos();
-        GameObject newEnemy = Instantiate(selectedPrefab, spawnPos, Quaternion.identity);
-
-        // Buff global des stats (inchangé)
-        float scalingFactor = 1f + (gameTimer / 60f) * 0.1f;
-        EnemyAI ai = newEnemy.GetComponent<EnemyAI>();
-        if (ai != null) ai.ApplyGlobalBuff(scalingFactor);
     }
 
     Vector2 GetRandomSpawnPos()
     {
-        // On ajoute un petit aléatoire pour que les ennemis du même "batch" ne soient pas empilés
         Vector2 randomDir = Random.insideUnitCircle.normalized;
         return (Vector2)player.position + randomDir * spawnRadius;
     }

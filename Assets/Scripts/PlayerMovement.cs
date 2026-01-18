@@ -2,39 +2,60 @@ using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
-    private Rigidbody2D rb;
-    private PlayerStats stats; // R�f�rence � tes stats
-    private Vector2 movementInput;
+    public float moveSpeed = 5f;
+    public Rigidbody2D rb;
+
+    // Ajout des références pour l'animation
+    private Animator animator;
+    private SpriteRenderer spriteRenderer;
+
+    private Vector2 movement;
 
     void Start()
     {
-        rb = GetComponent<Rigidbody2D>();
-        stats = GetComponent<PlayerStats>();
+        // On récupère les composants automatiquement au démarrage
+        animator = GetComponent<Animator>();
+        spriteRenderer = GetComponent<SpriteRenderer>();
 
-        // S�curit� : si tu as oubli� de mettre le script PlayerStats
-        if (stats == null)
-        {
-            Debug.LogError("Le script PlayerStats est manquant sur le joueur !");
-            stats = gameObject.AddComponent<PlayerStats>();
-        }
+        // Sécurité si tu as oublié de lier le RB
+        if (rb == null) rb = GetComponent<Rigidbody2D>();
     }
 
     void Update()
     {
-        // 1. On r�cup�re les touches (ZQSD ou Fl�ches)
-        // GetAxisRaw permet un arr�t imm�diat (plus nerveux/arcade)
-        float moveX = Input.GetAxisRaw("Horizontal");
-        float moveY = Input.GetAxisRaw("Vertical");
+        // 1. Récupération des entrées (Input)
+        float mx = Input.GetAxisRaw("Horizontal");
+        float my = Input.GetAxisRaw("Vertical");
 
-        // 2. On cr�e un vecteur et on le "normalise"
-        // Normaliser emp�che d'aller plus vite en diagonale
-        movementInput = new Vector2(moveX, moveY).normalized;
+        movement = new Vector2(mx, my).normalized;
+
+        // 2. GESTION DE L'ANIMATION
+        if (animator != null)
+        {
+            // On regarde si le joueur bouge (Vecteur > 0)
+            bool isMoving = movement.sqrMagnitude > 0;
+
+            // On envoie les infos à l'Animator (correspond aux paramètres de ton image)
+            animator.SetBool("moving", isMoving);
+            animator.SetFloat("moveX", mx);
+            animator.SetFloat("moveY", my);
+        }
+
+        // 3. FLIP DU SPRITE (Regarder à gauche ou à droite)
+        // Si on va à gauche (mx < 0), on coche "Flip X". Sinon on décoche.
+        //if (mx < 0)
+        //{
+        //    spriteRenderer.flipX = true;
+        //}
+        //else if (mx > 0)
+        //{
+        //    spriteRenderer.flipX = false;
+        //}
     }
 
     void FixedUpdate()
     {
-        // 3. On applique le mouvement physique
-        // On utilise stats.moveSpeed qu'on a d�fini dans l'�tape d'avant
-        rb.linearVelocity = movementInput * stats.moveSpeed;
+        // Application du mouvement physique
+        rb.linearVelocity = movement * moveSpeed;
     }
 }
