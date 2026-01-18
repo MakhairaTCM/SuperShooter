@@ -52,6 +52,8 @@ SpriteRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -73,8 +75,9 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 1919248021
-  m_SortingLayer: 3
+  m_SortingLayer: 0
   m_SortingOrder: -1
   m_Sprite: {fileID: 21300000, guid: 10e6053470392d24fb40e8a2c277b764, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -144,6 +147,8 @@ SpriteRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -165,8 +170,9 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 1919248021
-  m_SortingLayer: 3
+  m_SortingLayer: 0
   m_SortingOrder: 0
   m_Sprite: {fileID: 3946515025828126117, guid: 57433ae86e4163345aa7a31c41decbeb, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -273,11 +279,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 3461690725988920738}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c90174c871cb20642ad8ef1131c23c29, type: 3}
+  m_Script: {fileID: 11500000, guid: d169e288339a13f47aad8c14fc2a7a4f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  xAmplitude: 2
-  xSpeed: 1
-  yAmplitude: 0.15
-  ySpeed: 2
+  speed: 1.5
+  distance: 3
   spriteRenderer: {fileID: 1900435842482074304}
+  rb: {fileID: 1884996380066364879}
