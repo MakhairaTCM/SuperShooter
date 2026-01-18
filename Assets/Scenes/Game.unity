@@ -1722,6 +1722,7 @@ GameObject:
   m_Component:
   - component: {fileID: 741075246}
   - component: {fileID: 741075245}
+  - component: {fileID: 741075247}
   m_Layer: 0
   m_Name: MetricsManager
   m_TagString: Untagged
@@ -1741,6 +1742,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e6c7bed277f95c94494ef22f815aed79, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MetricsManager
+  saveInterval: 30
+  enableLogs: 1
 --- !u!4 &741075246
 Transform:
   m_ObjectHideFlags: 0
@@ -1756,6 +1759,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &741075247
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 741075244}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f0484a830752522449b479e9fb8c8eb7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NetworkUploader
+  uploadUrl: http://vsapo.alwaysdata.net/api/index.php
 --- !u!1 &807655014
 GameObject:
   m_ObjectHideFlags: 0

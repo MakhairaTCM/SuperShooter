@@ -19,11 +19,14 @@ public class MetricsManager : MonoBehaviour
     private PlayerStats playerStats;
     private Vector3 lastPlayerPosition; // Pour le calcul de distance
 
+    private NetworkUploader uploader;
     void Awake()
     {
         if (instance == null) instance = this;
         else Destroy(gameObject);
         DontDestroyOnLoad(gameObject);
+
+        uploader = GetComponent<NetworkUploader>();
     }
 
     void Update()
@@ -133,6 +136,20 @@ public class MetricsManager : MonoBehaviour
         if (!isSessionActive) return;
         UpdateSessionData(killerName);
         SaveToJSON();
+
+        if (uploader != null)
+        {
+            Debug.Log(" Tentative d'upload final...");
+            uploader.SendDataToDatabase(currentSession);
+        }
+        else
+        {
+            Debug.LogWarning(" Pas de NetworkUploader trouvé !");
+        }
+
+        isSessionActive = false;
+        Debug.Log(" Session terminée.");
+
         isSessionActive = false;
     }
 
