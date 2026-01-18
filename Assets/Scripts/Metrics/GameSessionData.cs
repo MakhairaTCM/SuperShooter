@@ -16,14 +16,18 @@ public class GameSessionData
     public float currentXp;
     public string causeOfDeath;
 
-    // --- NOUVEAU : Distance & Boss ---
-    public float totalDistanceTraveled; // En unités Unity (mètres)
+    // --- Position (NOUVEAU) --- 
+    public float playerPosX; 
+    public float playerPosY;
+
+    // ---  Distance & Boss ---
+    public float totalDistanceTraveled; 
     public List<string> bossesDefeated = new List<string>();
 
-    // --- NOUVEAU : Dégâts reçus par type d'ennemi ---
-    // On utilise une liste de cette petite classe ci-dessous pour le JSON
+    // ---  Dégâts reçus par type d'ennemi ---
+   
     public List<DamageSourceEntry> damageReceivedBySource = new List<DamageSourceEntry>();
-    public float totalDamageTaken; // Somme globale
+    public float totalDamageTaken; 
 
     // --- Build ---
     public float finalMoveSpeed;

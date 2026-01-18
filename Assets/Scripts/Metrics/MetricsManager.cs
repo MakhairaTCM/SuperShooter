@@ -150,6 +150,9 @@ public class MetricsManager : MonoBehaviour
         currentSession.currentXp = playerStats.currentXp;
         currentSession.causeOfDeath = status;
 
+        currentSession.playerPosX = playerStats.transform.position.x;
+        currentSession.playerPosY = playerStats.transform.position.y;
+
         currentSession.finalMoveSpeed = playerStats.moveSpeed;
         currentSession.finalMaxHp = playerStats.maxHealth;
         currentSession.finalMight = playerStats.might;

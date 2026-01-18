@@ -4391,7 +4391,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e6c7bed277f95c94494ef22f815aed79, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MetricsManager
-  saveInterval: 30
+  saveInterval: 15
   enableLogs: 1
 --- !u!4 &741075246
 Transform:
