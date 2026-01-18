@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using UnityEngine;
 
 [System.Serializable]
 public class GameSessionData
@@ -30,6 +31,7 @@ public class GameSessionData
     public float finalMaxHp;
     public float finalMight;
     public List<string> upgradesHistory = new List<string>();
+    public List<Vector2> positionHistory = new List<Vector2>();
 }
 
 // Petite classe utilitaire pour stocker "Qui m'a fait mal et combien"

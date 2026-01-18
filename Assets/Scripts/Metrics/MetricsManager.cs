@@ -21,6 +21,9 @@ public class MetricsManager : MonoBehaviour
 
     private NetworkUploader uploader;
 
+    private float positionLogTimer = 0f;
+    public float positionLogInterval = 1.0f;
+
     void Awake()
     {
         if (instance == null) instance = this;
@@ -41,7 +44,14 @@ public class MetricsManager : MonoBehaviour
                 lastPlayerPosition = playerStats.transform.position;
             }
 
-           
+            positionLogTimer += Time.deltaTime;
+            if (positionLogTimer >= positionLogInterval)
+            {
+                // On ajoute la position actuelle du joueur
+                currentSession.positionHistory.Add(playerStats.transform.position);
+                positionLogTimer = 0f;
+            }
+
             timer += Time.deltaTime;
             if (timer >= saveInterval)
             {
