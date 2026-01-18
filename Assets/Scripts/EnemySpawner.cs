@@ -8,7 +8,7 @@ public class EnemySpawner : MonoBehaviour
     {
         public string name;             // Nom pour t'y retrouver (ex: "Robot Basic")
         public GameObject enemyPrefab;  // Le prefab
-        public float spawnStartTime;    // Apparait à partir de quand ? (secondes)
+        public float spawnStartTime;    // Apparait ï¿½ partir de quand ? (secondes)
         public float weight = 1f;       // Chance d'apparition
     }
 
@@ -17,19 +17,19 @@ public class EnemySpawner : MonoBehaviour
     public GameObject boss1Prefab;
     public GameObject boss2Prefab;
 
-    [Header("Paramètres de Spawn & Difficulté")]
+    [Header("Paramï¿½tres de Spawn & Difficultï¿½")]
     public float spawnRadius = 12f;
     public float baseSpawnInterval = 1f;
     public float minSpawnInterval = 0.1f;
 
-    // NOUVEAU : Contrôle la vitesse à laquelle le jeu devient dur
+    // NOUVEAU : Contrï¿½le la vitesse ï¿½ laquelle le jeu devient dur
     // 0.05 = Normal, 0.1 = Difficile, 0.2 = Cauchemar
     public float difficultyScaling = 0.05f;
 
     [Header("OUTILS DE DEBUG (Tests)")]
     public bool forceSingleType = false;    // Coche pour forcer un seul type
     public int enemyIndexToSpawn = 0;       // L'index dans la liste 'enemies' ci-dessus
-    public bool spawnBossNow = false;       // Coche pour faire apparaître Boss 1 direct
+    public bool spawnBossNow = false;       // Coche pour faire apparaï¿½tre Boss 1 direct
 
     private float gameTimer;
     private float spawnTimer;
@@ -51,15 +51,23 @@ public class EnemySpawner : MonoBehaviour
         gameTimer += Time.deltaTime;
         spawnTimer += Time.deltaTime;
 
-        // --- 1. GESTION DEBUG BOSS ---
-        if (spawnBossNow)
+        // ... Gestion Boss ...
+        // Boss 1 apparaï¿½t ï¿½ 60 secondes (1 minute)
+        if (gameTimer >= 60f && !boss1Spawned)
         {
-            SpawnBoss(boss1Prefab);
-            spawnBossNow = false; // On décoche automatiquement
+            if (boss1Prefab != null) SpawnBoss(boss1Prefab);
+            boss1Spawned = true; // La variable est maintenant "utilisï¿½e" !
+        }
+
+        // Boss 2 apparaï¿½t ï¿½ 120 secondes (2 minutes)
+        if (gameTimer >= 120f && !boss2Spawned)
+        {
+            if (boss2Prefab != null) SpawnBoss(boss2Prefab);
+            boss2Spawned = true; // La variable est utilisï¿½e
         }
 
         // --- 2. GESTION BOSS AUTO (Temps) ---
-        // Exemple : Boss 1 à 300s (5min), Boss 2 à 600s (10min)
+        // Exemple : Boss 1 ï¿½ 300s (5min), Boss 2 ï¿½ 600s (10min)
         if (!boss1Spawned && gameTimer >= 300f)
         {
             SpawnBoss(boss1Prefab);
@@ -84,7 +92,7 @@ public class EnemySpawner : MonoBehaviour
             // On garde ta logique "x2" car elle est satisfaisante
             int enemiesPerBatch = (1 + (int)(gameTimer / 60f));
 
-            // Optionnel : Si le jeu est très avancé (> 10min), on double encore
+            // Optionnel : Si le jeu est trï¿½s avancï¿½ (> 10min), on double encore
             if (gameTimer > 600) enemiesPerBatch *= 2;
 
             for (int i = 0; i < enemiesPerBatch; i++)
@@ -137,7 +145,7 @@ public class EnemySpawner : MonoBehaviour
 
             foreach (var wave in enemies)
             {
-                // On ne prend que ceux qui ont le droit d'apparaître maintenant
+                // On ne prend que ceux qui ont le droit d'apparaï¿½tre maintenant
                 if (gameTimer >= wave.spawnStartTime)
                 {
                     availableEnemies.Add(wave);
