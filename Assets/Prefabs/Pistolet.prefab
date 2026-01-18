@@ -105,7 +105,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WeaponShooter
   weaponName: Pistolet
   currentLevel: 1
-  damage: 10
+  damage: 20
   cooldown: 1
   projectilePrefab: {fileID: 5954295908791973674, guid: 6f39fd7ca714fed42b46ffbfa5c12965, type: 3}
   range: 10

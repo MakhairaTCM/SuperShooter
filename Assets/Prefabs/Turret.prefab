@@ -106,7 +106,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WeaponShooter
   weaponName: Turret
   currentLevel: 1
-  damage: 5
+  damage: 10
   cooldown: 0.5
   projectilePrefab: {fileID: 5954295908791973674, guid: 6f39fd7ca714fed42b46ffbfa5c12965, type: 3}
   range: 15

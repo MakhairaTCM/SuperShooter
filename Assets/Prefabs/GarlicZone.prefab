@@ -141,10 +141,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   weaponName: Garlic
-  currentLevel: 20
-  damage: 2
-  cooldown: 0
-  damageInterval: 0.5
+  currentLevel: 1
+  damage: 10
+  cooldown: 0.2
+  damageInterval: 1
   enemyLayer:
     serializedVersion: 2
     m_Bits: 128

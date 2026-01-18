@@ -46,7 +46,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WeaponTurretSpawner
   weaponName: Turret
   currentLevel: 1
-  damage: 5
+  damage: 10
   cooldown: 0.5
   turretPrefab: {fileID: 2019433965206827820, guid: 23eacafb1abc04d42ae63e77f338d31b, type: 3}
   maxTurrets: 1
