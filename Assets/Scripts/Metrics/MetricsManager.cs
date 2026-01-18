@@ -1,14 +1,14 @@
 using UnityEngine;
 using System.IO;
 using System;
-using System.Collections.Generic; // Important
+using System.Collections.Generic;
 
 public class MetricsManager : MonoBehaviour
 {
     public static MetricsManager instance;
 
     [Header("Réglages")]
-    public float saveInterval = 30f;
+    public float saveInterval = 15f; // <--- MODIFIÉ : Passé de 30 à 15 secondes
     public bool enableLogs = true;
 
     private GameSessionData currentSession;
@@ -17,9 +17,10 @@ public class MetricsManager : MonoBehaviour
     private bool isSessionActive = false;
 
     private PlayerStats playerStats;
-    private Vector3 lastPlayerPosition; // Pour le calcul de distance
+    private Vector3 lastPlayerPosition;
 
     private NetworkUploader uploader;
+
     void Awake()
     {
         if (instance == null) instance = this;
@@ -33,7 +34,6 @@ public class MetricsManager : MonoBehaviour
     {
         if (isSessionActive && playerStats != null)
         {
-            // 1. CALCUL DE LA DISTANCE
             float distFrame = Vector3.Distance(playerStats.transform.position, lastPlayerPosition);
             if (distFrame > 0)
             {
@@ -41,12 +41,23 @@ public class MetricsManager : MonoBehaviour
                 lastPlayerPosition = playerStats.transform.position;
             }
 
-            // 2. LOGIQUE DE SAUVEGARDE AUTOMATIQUE
+           
             timer += Time.deltaTime;
             if (timer >= saveInterval)
             {
+               
                 UpdateSessionData("In Progress...");
+
+               
                 SaveToJSON();
+
+              
+                if (uploader != null)
+                {
+                    
+                    uploader.SendDataToDatabase(currentSession);
+                }
+
                 timer = 0f;
             }
         }
@@ -57,7 +68,7 @@ public class MetricsManager : MonoBehaviour
         if (!enableLogs) return;
 
         playerStats = player;
-        lastPlayerPosition = player.transform.position; // Initialisation position
+        lastPlayerPosition = player.transform.position;
 
         currentSession = new GameSessionData();
         currentSession.sessionID = Guid.NewGuid().ToString();
@@ -70,51 +81,64 @@ public class MetricsManager : MonoBehaviour
         timer = 0f;
 
         SaveToJSON();
+        
+        if (uploader != null) uploader.SendDataToDatabase(currentSession);
     }
 
-    // --- NOUVEAU : Enregistrer un Boss mort ---
     public void LogBossKill(string bossName)
     {
         if (!isSessionActive) return;
-        // On nettoie le nom (enlève le "(Clone)")
         string cleanName = bossName.Replace("(Clone)", "").Trim();
         currentSession.bossesDefeated.Add(cleanName);
-        SaveToJSON(); // Sauvegarde immédiate pour un événement important
+
+        
+        UpdateSessionData("In Progress (Boss Kill)");
+        SaveToJSON();
+        if (uploader != null) uploader.SendDataToDatabase(currentSession);
     }
 
-    // --- MODIFIÉ : Enregistrer les dégâts avec la source ---
     public void LogDamageTaken(float amount, string sourceName)
     {
         if (!isSessionActive) return;
 
         currentSession.totalDamageTaken += amount;
-
-        // Nettoyage du nom
         string cleanName = sourceName.Replace("(Clone)", "").Trim();
 
-        // Chercher si on a déjà une entrée pour cet ennemi
         DamageSourceEntry entry = currentSession.damageReceivedBySource.Find(x => x.enemyName == cleanName);
 
         if (entry != null)
         {
-            // Il existe déjà, on ajoute les dégâts
             entry.damageAmount += amount;
         }
         else
         {
-            // Nouvelle menace, on crée l'entrée
             DamageSourceEntry newEntry = new DamageSourceEntry();
             newEntry.enemyName = cleanName;
             newEntry.damageAmount = amount;
             currentSession.damageReceivedBySource.Add(newEntry);
         }
+        
     }
 
+    
     public void LogUpgrade(string upgradeName)
     {
         if (!isSessionActive) return;
+
         string logEntry = $"[{Mathf.Round(Time.time - startTime)}s] {upgradeName}";
         currentSession.upgradesHistory.Add(logEntry);
+
+        
+        UpdateSessionData("In Progress (Level Up)");
+
+   
+        SaveToJSON();
+
+       
+        if (uploader != null)
+        {
+            uploader.SendDataToDatabase(currentSession);
+        }
     }
 
     void UpdateSessionData(string status)
@@ -134,7 +158,8 @@ public class MetricsManager : MonoBehaviour
     public void EndSession(string killerName)
     {
         if (!isSessionActive) return;
-        UpdateSessionData(killerName);
+
+        UpdateSessionData(killerName); 
         SaveToJSON();
 
         if (uploader != null)
@@ -149,8 +174,6 @@ public class MetricsManager : MonoBehaviour
 
         isSessionActive = false;
         Debug.Log(" Session terminée.");
-
-        isSessionActive = false;
     }
 
     void SaveToJSON()
@@ -159,6 +182,8 @@ public class MetricsManager : MonoBehaviour
         string json = JsonUtility.ToJson(currentSession, true);
         string folderPath = Path.Combine(Application.persistentDataPath, "Metrics");
         if (!Directory.Exists(folderPath)) Directory.CreateDirectory(folderPath);
+
+        // Note : Le nom de fichier contient l'ID unique, donc on écrase le même fichier 
         string fileName = $"Log_{currentSession.timestampDate.Replace(":", "-").Replace(" ", "_")}_{currentSession.sessionID}.json";
         File.WriteAllText(Path.Combine(folderPath, fileName), json);
     }
